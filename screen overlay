@@ -1,0 +1,93 @@
+// 1. Cleanup and Style Injection
+if (window.myOverlay) { window.myOverlay.remove(); window.myRemote.remove(); clearInterval(window.ghostInterval); }
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes glitcheffect {
+        0% { clip: rect(42px, 9999px, 44px, 0); transform: skew(0.5deg); }
+        5% { clip: rect(12px, 9999px, 59px, 0); transform: skew(0.2deg); }
+        10% { clip: rect(87px, 9999px, 73px, 0); transform: skew(0.8deg); }
+        15% { clip: rect(0, 0, 0, 0); }
+    }
+    .glitch-active { animation: glitcheffect 0.4s infinite linear alternate-reverse; }
+`;
+document.head.appendChild(style);
+
+// 2. Create the "Void" Overlay
+window.myOverlay = document.createElement('div');
+Object.assign(window.myOverlay.style, {
+    position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+    backgroundColor: 'rgba(0,0,0,0.6)', zIndex: '2147483645', pointerEvents: 'none',
+    display: 'flex', justifyContent: 'center', alignItems: 'center',
+    color: 'white', fontFamily: 'serif', transition: 'all 2s ease'
+});
+window.overlayText = document.createTextNode('');
+window.myOverlay.appendChild(window.overlayText);
+document.documentElement.appendChild(window.myOverlay);
+
+// 3. Create the Dark Remote
+window.myRemote = document.createElement('div');
+Object.assign(window.myRemote.style, {
+    position: 'fixed', top: '20px', left: '20px', width: '200px',
+    background: '#050505', border: '1px solid #300', borderRadius: '0px',
+    padding: '12px', zIndex: '2147483647', color: '#800', fontFamily: 'serif',
+    boxShadow: '0 0 20px rgba(136, 0, 0, 0.2)'
+});
+
+const header = document.createElement('div');
+header.innerText = '— OVERRIDE —';
+header.style.cssText = 'font-size:12px; margin-bottom:15px; cursor:move; text-align:center; letter-spacing:3px;';
+window.myRemote.appendChild(header);
+
+const makeBtn = (txt, func) => {
+    const b = document.createElement('button');
+    b.innerText = txt;
+    Object.assign(b.style, {
+        width: '100%', marginTop: '8px', padding: '10px', cursor: 'pointer',
+        background: '#000', color: '#666', border: '1px solid #222', fontSize: '9px',
+        textTransform: 'uppercase', transition: '0.5s'
+    });
+    b.onmouseover = () => { b.style.color = '#f00'; b.style.borderColor = '#f00'; };
+    b.onmouseout = () => { b.style.color = '#666'; b.style.borderColor = '#222'; };
+    b.onclick = func;
+    window.myRemote.appendChild(b);
+};
+
+// --- THE "SCARY" TECH FEATURES ---
+
+makeBtn('GHOST SCROLL', () => {
+    if (window.ghostInterval) {
+        clearInterval(window.ghostInterval);
+        window.ghostInterval = null;
+    } else {
+        window.ghostInterval = setInterval(() => {
+            window.scrollBy(0, (Math.random() * 4) - 2);
+        }, 50);
+    }
+});
+
+makeBtn('CORRUPT DATA', () => {
+    document.body.classList.toggle('glitch-active');
+    const allText = document.querySelectorAll('h1, h2, h3, p, a');
+    allText.forEach(el => {
+        if (Math.random() > 0.8) el.innerText = "NULL ERROR";
+    });
+});
+
+makeBtn('THE VANISH', () => {
+    document.body.style.transition = 'opacity 5s ease';
+    document.body.style.opacity = '0.05';
+    window.myOverlay.style.backgroundColor = 'black';
+    setTimeout(() => { window.overlayText.nodeValue = "IS ANYONE THERE?"; }, 3000);
+});
+
+makeBtn('RECOVER SYSTEM', () => {
+    location.reload(); // Hard reset is the only way out of the corruption
+});
+
+document.documentElement.appendChild(window.myRemote);
+
+// Drag Logic
+let drag = false;
+window.myRemote.onmousedown = () => drag = true;
+document.onmousemove = (e) => { if (drag) { window.myRemote.style.left = e.clientX - 100 + 'px'; window.myRemote.style.top = e.clientY - 10 + 'px'; } };
+document.onmouseup = () => drag = false;
