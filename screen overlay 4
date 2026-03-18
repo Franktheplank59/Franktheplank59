@@ -1,0 +1,70 @@
+// 1. Cleanup
+if (window.myOverlay) { window.myOverlay.remove(); window.myRemote.remove(); }
+
+// 2. Create Overlay
+window.myOverlay = document.createElement('div');
+Object.assign(window.myOverlay.style, {
+    position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+    backgroundColor: 'rgba(0,0,0,0.8)', zIndex: '2147483647', display: 'flex',
+    justifyContent: 'center', alignItems: 'center', pointerEvents: 'none',
+    color: '#0f0', fontFamily: 'monospace', fontSize: '5vw', fontWeight: 'bold'
+});
+window.overlayText = document.createTextNode('SYSTEM ACTIVE');
+window.myOverlay.appendChild(window.overlayText);
+document.documentElement.appendChild(window.myOverlay);
+
+// 3. Create Remote
+window.myRemote = document.createElement('div');
+Object.assign(window.myRemote.style, {
+    position: 'fixed', top: '20px', left: '20px', width: '180px',
+    background: '#111', border: '2px solid #0f0', borderRadius: '10px',
+    padding: '10px', zIndex: '2147483647', color: 'white', fontFamily: 'sans-serif',
+    boxShadow: '0 0 15px #0f0'
+});
+
+const header = document.createElement('div');
+header.innerText = 'REMOTE';
+header.style.cssText = 'font-size:10px; color:#0f0; margin-bottom:10px; cursor:move;';
+window.myRemote.appendChild(header);
+
+const input = document.createElement('input');
+input.type = 'text';
+input.placeholder = 'Type here...';
+input.style.width = '100%';
+input.oninput = (e) => { window.overlayText.nodeValue = e.target.value.toUpperCase(); };
+window.myRemote.appendChild(input);
+
+const makeBtn = (txt, color, func) => {
+    const b = document.createElement('button');
+    b.innerText = txt;
+    Object.assign(b.style, {
+        width: '100%', marginTop: '5px', padding: '5px', cursor: 'pointer',
+        background: '#333', color: color, border: '1px solid ' + color, borderRadius: '4px'
+    });
+    b.onclick = func;
+    window.myRemote.appendChild(b);
+};
+
+makeBtn('BLACKOUT', '#fff', () => window.myOverlay.style.backgroundColor = 'black');
+makeBtn('GHOST', '#0ff', () => {
+    const isBlur = document.body.style.filter.includes('blur');
+    document.body.style.filter = isBlur ? 'none' : 'blur(5px)';
+});
+makeBtn('STATIC', '#f0f', () => {
+    window.myOverlay.style.background = 'repeating-radial-gradient(circle, #000, #222 2px)';
+    window.myOverlay.style.opacity = '0.5';
+});
+makeBtn('CLOSE', '#f00', () => { window.myOverlay.remove(); window.myRemote.remove(); });
+
+document.documentElement.appendChild(window.myRemote);
+
+// Simple Drag
+let drag = false;
+window.myRemote.onmousedown = () => drag = true;
+document.onmousemove = (e) => {
+    if (drag) {
+        window.myRemote.style.left = e.clientX - 90 + 'px';
+        window.myRemote.style.top = e.clientY - 10 + 'px';
+    }
+};
+document.onmouseup = () => drag = false;
