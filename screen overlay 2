@@ -1,0 +1,94 @@
+// 1. Cleanup & CSS Setup
+if (window.myOverlay) { window.myOverlay.remove(); window.myRemote.remove(); }
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes flicker {
+        0% { opacity: 0.1; } 5% { opacity: 0.7; } 10% { opacity: 0.3; }
+        15% { opacity: 0.9; } 20% { opacity: 0.2; } 100% { opacity: 1; }
+    }
+    .flicker-active { animation: flicker 0.2s infinite; }
+    .scanline {
+        width: 100%; height: 100px; z-index: 2147483646; position: fixed;
+        background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 0%, rgba(18, 16, 16, 0.25) 50%, rgba(18, 16, 16, 0) 100%);
+        opacity: 0.1; pointer-events: none;
+    }
+`;
+document.head.appendChild(style);
+
+// 2. Create Overlay
+window.myOverlay = document.createElement('div');
+Object.assign(window.myOverlay.style, {
+    position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+    backgroundColor: 'rgba(0,0,0,0.8)', zIndex: '2147483645', display: 'flex',
+    justifyContent: 'center', alignItems: 'center', pointerEvents: 'none',
+    color: '#f00', fontFamily: '"Courier New", monospace', fontSize: '4vw', textShadow: '0 0 10px #f00'
+});
+window.overlayText = document.createTextNode('SIGNAL LOST');
+window.myOverlay.appendChild(window.overlayText);
+document.documentElement.appendChild(window.myOverlay);
+
+// 3. Create Remote
+window.myRemote = document.createElement('div');
+Object.assign(window.myRemote.style, {
+    position: 'fixed', top: '20px', left: '20px', width: '200px',
+    background: '#0a0a0a', border: '1px solid #400', borderRadius: '5px',
+    padding: '12px', zIndex: '2147483647', color: '#f00', fontFamily: 'monospace'
+});
+
+const header = document.createElement('div');
+header.innerText = ' [ REDACTED ] ';
+header.style.cssText = 'font-size:12px; margin-bottom:10px; cursor:move; text-align:center; border-bottom: 1px solid #400;';
+window.myRemote.appendChild(header);
+
+const makeBtn = (txt, func) => {
+    const b = document.createElement('button');
+    b.innerText = txt;
+    Object.assign(b.style, {
+        width: '100%', marginTop: '5px', padding: '8px', cursor: 'pointer',
+        background: '#1a0000', color: '#f00', border: '1px solid #600', fontSize: '10px'
+    });
+    b.onclick = func;
+    window.myRemote.appendChild(b);
+};
+
+// --- HORROR THEMED FEATURES ---
+
+makeBtn('POWER FAILURE', () => {
+    window.myOverlay.style.backgroundColor = 'black';
+    window.myOverlay.classList.toggle('flicker-active');
+    window.overlayText.nodeValue = "CRITICAL ERROR";
+});
+
+makeBtn('SURVEILLANCE CAM', () => {
+    window.myOverlay.style.background = 'transparent';
+    window.myOverlay.style.boxShadow = 'inset 0 0 150px #000';
+    window.overlayText.nodeValue = "● REC " + new Date().toLocaleTimeString();
+    window.overlayText.style.fontSize = '20px';
+    window.myOverlay.style.alignItems = 'flex-start';
+    window.myOverlay.style.padding = '50px';
+});
+
+makeBtn('BLOOD MOON', () => {
+    document.body.style.filter = 'sepia(1) hue-rotate(-50deg) saturate(5) contrast(1.5)';
+});
+
+makeBtn('STATIC INTERFERENCE', () => {
+    window.myOverlay.style.background = 'url("https://media.giphy.com/media/oEI9uWUqWMrBK/giphy.gif")';
+    window.myOverlay.style.opacity = '0.2';
+});
+
+makeBtn('RESET SYSTEM', () => {
+    document.body.style.filter = 'none';
+    window.myOverlay.className = '';
+    window.myOverlay.style.background = 'rgba(0,0,0,0.8)';
+    window.myOverlay.style.boxShadow = 'none';
+    window.overlayText.nodeValue = "SYSTEM RESTORED";
+});
+
+document.documentElement.appendChild(window.myRemote);
+
+// Simple Drag
+let drag = false;
+window.myRemote.onmousedown = () => drag = true;
+document.onmousemove = (e) => { if (drag) { window.myRemote.style.left = e.clientX - 100 + 'px'; window.myRemote.style.top = e.clientY - 10 + 'px'; } };
+document.onmouseup = () => drag = false;
