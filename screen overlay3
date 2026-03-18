@@ -1,0 +1,106 @@
+// 1. Cleanup & Global Setup
+if (window.myOverlay) { window.myOverlay.remove(); window.myRemote.remove(); }
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake { 
+        0% { transform: translate(1px, 1px); } 
+        20% { transform: translate(-3px, 0px); } 
+        40% { transform: translate(3px, 2px); } 
+        100% { transform: translate(1px, -2px); } 
+    }
+    .shake-active { animation: shake 0.1s infinite; }
+`;
+document.head.appendChild(style);
+
+// 2. Create Overlay
+window.myOverlay = document.createElement('div');
+Object.assign(window.myOverlay.style, {
+    position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+    backgroundColor: 'rgba(0,0,0,0.7)', zIndex: '2147483647', display: 'flex',
+    flexDirection: 'column', justifyContent: 'center', alignItems: 'center', 
+    pointerEvents: 'none', color: '#0f0', fontFamily: 'monospace', transition: '0.3s'
+});
+window.overlayText = document.createTextNode('CONSOLEX_v2.0');
+const textContainer = document.createElement('div');
+textContainer.style.fontSize = '5vw';
+textContainer.appendChild(window.overlayText);
+window.myOverlay.appendChild(textContainer);
+document.documentElement.appendChild(window.myOverlay);
+
+// 3. Create Remote
+window.myRemote = document.createElement('div');
+Object.assign(window.myRemote.style, {
+    position: 'fixed', top: '20px', left: '20px', width: '200px',
+    background: 'linear-gradient(145deg, #111, #222)', border: '1px solid #333', 
+    borderRadius: '12px', padding: '15px', zIndex: '2147483647', 
+    color: 'white', fontFamily: 'sans-serif', boxShadow: '0 10px 30px rgba(0,0,0,1)'
+});
+
+const header = document.createElement('div');
+header.innerText = '◈ DASHBOARD';
+header.style.cssText = 'font-size:12px; letter-spacing:2px; color:#555; margin-bottom:12px; cursor:move; font-weight:bold;';
+window.myRemote.appendChild(header);
+
+const input = document.createElement('input');
+input.placeholder = 'Broadcast Message...';
+input.style.cssText = 'width:100%; background:#000; border:1px solid #444; color:#0f0; padding:5px; margin-bottom:10px; font-family:monospace;';
+input.oninput = (e) => { window.overlayText.nodeValue = e.target.value.toUpperCase(); };
+window.myRemote.appendChild(input);
+
+const makeBtn = (txt, color, func) => {
+    const b = document.createElement('button');
+    b.innerText = txt;
+    Object.assign(b.style, {
+        width: '100%', marginTop: '4px', padding: '6px', cursor: 'pointer',
+        background: '#222', color: color, border: '1px solid ' + color, borderRadius: '4px',
+        fontSize: '11px', fontWeight: 'bold', transition: '0.2s'
+    });
+    b.onmouseover = () => b.style.background = color;
+    b.onmouseover = () => { b.style.backgroundColor = color; b.style.color = '#000'; };
+    b.onmouseout = () => { b.style.backgroundColor = '#222'; b.style.color = color; };
+    b.onclick = func;
+    window.myRemote.appendChild(b);
+};
+
+// --- FEATURES ---
+
+makeBtn('MATRIX RAIN', '#0f0', () => {
+    window.myOverlay.style.background = 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,255,0,0.1) 50%, rgba(0,0,0,0) 100%)';
+    window.myOverlay.style.backgroundSize = '100% 20px';
+    window.overlayText.nodeValue = "DECRYPTING...";
+});
+
+makeBtn('CINEMATIC VIGNETTE', '#aaa', () => {
+    window.myOverlay.style.boxShadow = 'inset 0 0 200px 100px rgba(0,0,0,0.9)';
+});
+
+makeBtn('SYSTEM SHAKE', '#f0f', () => {
+    document.body.classList.toggle('shake-active');
+});
+
+makeBtn('NIGHT VISION', '#7f7', () => {
+    document.body.style.filter = 'sepia(1) hue-rotate(80deg) brightness(1.2) contrast(1.2)';
+});
+
+makeBtn('RESET FILTERS', '#fff', () => {
+    document.body.style.filter = 'none';
+    document.body.classList.remove('shake-active');
+    window.myOverlay.style.background = 'rgba(0,0,0,0.7)';
+    window.myOverlay.style.boxShadow = 'none';
+    window.overlayText.nodeValue = "SYSTEM RESET";
+});
+
+makeBtn('TERMINATE', '#f44', () => { 
+    window.myOverlay.remove(); 
+    window.myRemote.remove(); 
+    document.body.style.filter = 'none';
+    document.body.classList.remove('shake-active');
+});
+
+document.documentElement.appendChild(window.myRemote);
+
+// Drag Logic
+let drag = false, ox, oy;
+window.myRemote.onmousedown = (e) => { drag = true; ox = e.clientX - window.myRemote.offsetLeft; oy = e.clientY - window.myRemote.offsetTop; };
+document.onmousemove = (e) => { if (drag) { window.myRemote.style.left = e.clientX - ox + 'px'; window.myRemote.style.top = e.clientY - oy + 'px'; } };
+document.onmouseup = () => drag = false;
