@@ -1,0 +1,97 @@
+(function() {
+    if (window.ovl) window.ovl.remove();
+    if (window.rem) window.rem.remove();
+    if (window.activeInt) clearInterval(window.activeInt);
+
+    // 1. Core Styles
+    var style = document.createElement('style');
+    style.textContent = ".v14-shake { animation: v14s 0.1s infinite; } @keyframes v14s { 0% { transform:translate(2px,2px); } 50% { transform:translate(-2px,-2px); } } .v14-fall { transition: transform 2s; transform: translateY(100vh) rotate(20deg) !important; }";
+    document.head.appendChild(style);
+
+    // 2. Overlay
+    window.ovl = document.createElement('div');
+    var s = window.ovl.style;
+    s.position = 'fixed'; s.top = '0'; s.left = '0'; s.width = '100vw'; s.height = '100vh';
+    s.backgroundColor = 'rgba(0,0,0,0.85)'; s.zIndex = '2147483645'; s.pointerEvents = 'none';
+    s.display = 'flex'; s.justifyContent = 'center'; s.alignItems = 'center';
+    s.color = '#0f0'; s.fontFamily = 'monospace'; s.fontSize = '30px';
+    document.documentElement.appendChild(window.ovl);
+
+    // 3. Remote
+    window.rem = document.createElement('div');
+    var r = window.rem.style;
+    r.position = 'fixed'; r.top = '20px'; r.left = '20px'; r.width = '160px';
+    r.background = '#000'; r.border = '1px solid #0f0'; r.padding = '10px';
+    r.zIndex = '2147483647'; r.color = '#0f0'; r.textAlign = 'center'; r.fontFamily = 'monospace';
+    window.rem.innerText = 'OVERLOAD_v14';
+
+    function reset() {
+        if (window.activeInt) clearInterval(window.activeInt);
+        document.body.classList.remove('v14-shake');
+        window.ovl.style.backgroundColor = 'rgba(0,0,0,0.85)';
+        window.ovl.style.backgroundImage = 'none';
+        window.ovl.textContent = '';
+        window.ovl.style.pointerEvents = 'none';
+    }
+
+    function addBtn(label, color, action) {
+        var b = document.createElement('button');
+        b.innerText = label;
+        var bs = b.style;
+        bs.width = '100%'; bs.marginTop = '6px'; bs.background = '#111';
+        bs.color = color; bs.border = '1px solid ' + color;
+        bs.fontSize = '9px'; bs.cursor = 'pointer'; bs.fontFamily = 'monospace';
+        b.onclick = function() { reset(); action(); };
+        window.rem.appendChild(b);
+    }
+
+    // --- NEW OVERLOAD MODULES ---
+
+    addBtn('TERMINAL', '#0f0', function() {
+        var pass = prompt("ENTER ACCESS KEY:");
+        if (pass) {
+            window.ovl.textContent = "DECRYPTING " + pass.toUpperCase() + "...";
+            setTimeout(function() { window.ovl.textContent = "ACCESS GRANTED"; }, 2000);
+        }
+    });
+
+    addBtn('GRAVITY FAIL', '#ff0', function() {
+        var images = document.querySelectorAll('img, svg, button');
+        for (var i = 0; i < images.length; i++) {
+            images[i].classList.add('v14-fall');
+        }
+        window.ovl.textContent = "PHYSICS ERROR";
+    });
+
+    addBtn('STATIC NOISE', '#fff', function() {
+        window.ovl.style.backgroundImage = 'url("https://media.giphy.com/media/oEI9uWUqWMrBK/giphy.gif")';
+        window.ovl.style.opacity = '0.2';
+    });
+
+    addBtn('BLACKOUT', '#f00', function() {
+        document.body.classList.add('v14-shake');
+        var f = true; var c = 0;
+        window.activeInt = setInterval(function() {
+            window.ovl.style.backgroundColor = f ? 'white' : 'red';
+            f = !f; c++;
+            if (c > 16) {
+                clearInterval(window.activeInt);
+                document.body.classList.remove('v14-shake');
+                window.ovl.style.backgroundColor = 'black';
+                window.ovl.textContent = 'HACKED';
+                window.ovl.style.pointerEvents = 'auto';
+                window.ovl.onclick = function() { reset(); };
+            }
+        }, 80);
+    });
+
+    addBtn('REBOOT', '#888', function() { location.reload(); });
+
+    document.documentElement.appendChild(window.rem);
+
+    // Drag Logic
+    var drag = false, ox, oy;
+    window.rem.onmousedown = function(e) { drag = true; ox = e.clientX - window.rem.offsetLeft; oy = e.clientY - window.rem.offsetTop; };
+    window.onmousemove = function(e) { if(drag) { window.rem.style.left = e.clientX-ox+'px'; window.rem.style.top = e.clientY-oy+'px'; } };
+    window.onmouseup = function() { drag = false; };
+})();
